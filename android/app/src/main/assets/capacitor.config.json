@@ -1,0 +1,8 @@
+{
+  "appId": "com.pragma.loginGAF",
+  "appName": "LoginGoogleAndFacebook",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "www",
+  "cordova": {}
+}

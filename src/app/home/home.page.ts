@@ -7,6 +7,18 @@ import { Component } from '@angular/core';
 })
 export class HomePage {
 
+  picture;
+  name;
+  email;
+
   constructor() {}
+
+  loginGoogle() {
+    console.log('Login con google') ;
+  }
+
+  loginFacebook() {
+    console.log('Login con Facebook');
+  }
 
 }
