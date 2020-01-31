@@ -1,6 +1,6 @@
 {
-  "appId": "com.pragma.loginGAF",
-  "appName": "LoginGoogleAndFacebook",
+  "appId": "com.pragma.logingaf",
+  "appName": "LoginGaF",
   "bundledWebRuntime": false,
   "npmClient": "npm",
   "webDir": "www",

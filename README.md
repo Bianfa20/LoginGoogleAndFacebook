@@ -102,7 +102,7 @@ export class AppModule {}
 Para implementar el login de google en nuestro proyecto ionic debemos:
 1. Habiliar autenticación de google en firebase
 2. Implementar la autenticación en Ionic
-3. SHA1
+3. Implementar el plugin GooglePlus
 
 ### 1. Habiliar autenticación de google en firebase
 Para habilitar la autenticación con google en firebase, solo debemos entrar a la consola de firebase, ingresar en la parte de `Authentication` y luego en `Método de inicio de sesión`.
@@ -117,7 +117,7 @@ Y finalmente podemos ver la autenticación de google en firebase habilitada como
 
 ![](https://i.imgur.com/g2WOpdy.png)
 
-### 3. Implementar la autenticación en Ionic
+### 2. Implementar la autenticación en Ionic
 Recuerde que en esta guia nos apoyamos en un diseño previamente desarrollado para facilitar la implementación del login, dicho diseño consiste en dos botones como podemos ver en `Vista del diseño`, uno para iniciar sesión con google que ejecuta el método `LoginGoogle()`, y el otro para iniciar sesión con facebook que ejecuta el método `LoginFacebook()`, estos métodos por ahora simplemente ejecutan un console.log, pero ahora vamos a importar el servicio de autenticación de firebase para implementar el login de google.
 
 Para implementar el login de google debemos inyectar el servicio de autenticación `AngularFireAuth` como se mencionó anteriormente e importar la libreria de firebase, de la siguiente manera.
@@ -138,7 +138,7 @@ export class HomePage {
   name;
   email;
 
-  constructor( private  afAuth: AngularFireAuth ) {}
+  constructor( private afAuth: AngularFireAuth ) {}
 
   loginGoogle() {
     console.log('Login con google') ;
@@ -164,9 +164,172 @@ async loginGoogle() {
  }
 ```
 
-Ahora, corremos nuestro proyecto ionic e intentemos iniciar sesión con google, nos pedirá la cuenta con la que queremos iniciar sesión y luego nos imprimirá por consola todo los datos obtenidos del usuario, además de los datos que pintamos en la app, como podemos ver en la siguiente imagen.
+Ahora, corremos nuestro proyecto ionic e intentemos iniciar sesión con google, nos pedirá la cuenta con la que queremos iniciar sesión y luego nos imprimirá por consola todo los datos obtenidos del usuario además de los datos que pintamos en la app, como podemos ver en la siguiente imagen.
 
 ![](https://i.imgur.com/HREYHfM.png)
+
+### 3. Implementar el plugin GooglePlus
+Hasta este punto de la guia ya tenemos un login con google pero este login aún no funciona en ambientes móviles, para esto necesitamos usar el plugin `GooglePlus` de ionic, entonces comencemos con la instalación del plugin en nuestro proyecto.
+
+```sh
+\ProyectoIonic> ionic cordova plugin add cordova-plugin-googleplus
+
+\ProyectoIonic> npm install @ionic-native/google-plus
+```
+
+Antes de empezar a utilizar este plugin en nuestro proyecto ionic, necesitamos configurar nuestro proyecto firebase para iOS y Android, para esto debemos entrar a la consola de firebase en nuestro proyecto, le damos en `Añadir aplicación`, como se puede observar en la siguiente imagen.
+
+![](https://i.imgur.com/05iZyRJ.png)
+
+Ahora seleccionamos el icono de android.
+![](https://i.imgur.com/5OqMkKB.png)
+
+Luego nos piden el nombre del paquete de android o dominio, esto lo podemos encontrar en el archivo `config.xml` este nombre lo podemos cambiar, yo lo tengo como `io.ionic.starter` y lo cambiaré a `com.pragma.logingaf` de igual forma pondré en el `name` el nombre de mi aplicación para que quede de la siguiente manera.
+
+NO PONER MAYUSCULAS EN EL NOMBRE DEL PAQUETE
+![](https://i.imgur.com/ekP5qxX.png)
+
+Si estas utilizando capacitor, asegurate de editar también el nombre del paquete o dominio en el archivo `capacitor.config.json`
+![](https://i.imgur.com/7YTzKrC.png)
+
+Ya que conocemos el nombre del paquete de nuestra aplicación volvemos a firebase e ingresamos el nombre en `nombre del paquete de android` en este caso sería `com.pragma.logingaf`, en `Apodo de la aplicacion` es recomendable poner el nombre de nuestra app para este caso sería LoginGaF y en el `Certificado de firma de depuración SHA-1` aunque firebase lo pida como opcional, para el login en ionic es muy importante, asi que ejecutamos el siguiente comando dependiendo del S.O. de nuestra maquina.
+
+Mac/Linux:
+```sh
+$ keytool -list -v -alias androiddebugkey -keystore ~/.android/debug.keystore
+```
+
+Windows:
+```sh
+> keytool -list -v -alias androiddebugkey -keystore C:\Users\${suUsuario}\.android\debug.keystore
+```
+
+*nota:* La variable `keytool` para windows la podemos usar instalando la versión reciente de JDK.
+
+Al ejecutar el comando anterior nos pedirá una contraseña, ingresamos `android` y obtendremos el `SHA-1`, la cual tenemos que ingresar en firebase, lo cual al llenar todos los campos quedaría algo parecido a la siguiente manera.
+
+![](https://i.imgur.com/7TlF1Uh.png)
+
+Le damos en `Registrar aplicación` y descargamos el archivo .JSON que nos proporciona firebase, es muy importante que conservemos ese archivo porque es necesario para cuando tengamos nuestro proyecto android y lo ejecutemos, además de que tiene un dato importante que necesitaremos para utilizar el plugin GooglePlus.
+
+![](https://i.imgur.com/v8LXJWe.png)
+
+Luego le damos siguiente a todo, hasta que nos diga que esta comprobando la aplicación, saltamos ese paso, como se puede ver en la siguiente imagen.
+
+![](https://i.imgur.com/kb7AD2h.png)
+
+Y listo, ya tenemos nuestra aplicación android registrado en firebase, para iOS lo explicaré en otra ocasión.
+
+Ahora que tenemos nuestra aplicación android registrada en firebase e instalado el plugin GooglePlus, podemos implementar el login de google en ambientes android, para esto necesitamos inyectar `GooglePlus` en nuestro proyecto y también necesitamos inyectar `platform` para poder diferenciar si el proyecto esta siendo ejecutado en un ambiente móvil o en un ambiente web, todo esto de la siguiente manera.
+
+Abrimos el archivo `/src/app/app.module.ts` e importamos GooglePlus
+```javascript
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+...
+
+// Plugins
+import { GooglePlus } from '@ionic-native/google-plus/ngx';
+
+@NgModule({
+  declarations: [AppComponent],
+  imports: [
+    BrowserModule,
+    IonicModule.forRoot(),
+    AppRoutingModule,
+    AngularFireModule.initializeApp(firebaseConfig), //Modulo 1 a importa
+    AngularFireAuthModule // Modulo 2 a importar
+  ],
+  providers: [
+      ...,
+      GooglePlus
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}
+```
+
+Luego abrimos el archivo `/src/app/home/home.page.ts` e inyectamos los plugins antes mecionados
+```javascript
+import { Component } from '@angular/core';
+import { AngularFireAuth } from '@angular/fire/auth';
+import * as firebase from 'firebase/app';
+import { Platform } from '@ionic/angular';
+import { GooglePlus } from '@ionic-native/google-plus/ngx';
+
+@Component({
+  selector: 'app-home',
+  templateUrl: 'home.page.html',
+  styleUrls: ['home.page.scss'],
+})
+export class HomePage {
+  ...
+  constructor(
+    private afAuth: AngularFireAuth,
+    private platform: Platform,
+    private googlePlus: GooglePlus
+  ) {}
+
+  loginGoogle() {
+    if (this.platform.is('android')) {
+      this.loginGoogleAndroid();
+    } else {
+      this.loginGoogleWeb();
+    }
+  }
+
+  async loginGoogleAndroid() {
+    const res = await this.googlePlus.login({
+      'webClientId': <tu client_id>,
+      'offline': true
+    });
+    const resConfirmed = await this.afAuth.auth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(res.idToken));
+    const user = resConfirmed.user;
+    this.picture = user.photoURL;
+    this.name = user.displayName;
+    this.email = user.email;
+  }
+
+  async loginGoogleWeb() {
+    const res = await this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    const user = res.user;
+    console.log(user);
+    this.picture = user.photoURL;
+    this.name = user.displayName;
+    this.email = user.email;
+  }
+  ...
+}
+```
+
+En el codigo anterior tenemos que reemplazar `<Tu client_id>` por nuestro `client_id` que podemos encontrar en el archivo `google-services.json` que descargamos previamente en firebase registrando nuestra aplicación android, dicho archivo tiene varios client_id, el que nosotros debemos utilizar es el que esta dentro de del atributo `services`, y el que tiene el `client_type` en 3.
+
+```javascript
+{
+  ... ,
+  "client": [
+      ... ,
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "945473312650-fgpee13gk4vpbrqcnenbm4s5g78jtqk3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
+```
+
+Si el codigo anterior fuera nuestro JSON del archivo `google-services.json`, nuestro `client_id` seria `"945473312650-fgpee13gk4vpbrqcnenbm4s5g78jtqk3.apps.googleusercontent.com"`
+
+Y finalmente para terminar con la implementación de nuestro login de google y construir el poryecto de android debemos copiar nuestro archivo `google-services.json` en la carpeta `/android` y en la carpeta `/android/app`, y listo temenos nuestro login de google funcionando en ambientes android y web.
+
+
 
 
 .

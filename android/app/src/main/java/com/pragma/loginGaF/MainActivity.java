@@ -1,4 +1,4 @@
-package com.pragma.loginGAF;
+package com.pragma.logingaf;
 
 import android.os.Bundle;
 
