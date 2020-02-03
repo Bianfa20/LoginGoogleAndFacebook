@@ -1,12 +1,18 @@
 # Ionic 4 - `Angular`
 ## Login Con Google y Facebook 
 Implementar un login con google o con facebook en ionic puede ser un dolor de cabeza para muchos desarrolladores de app móviles híbridas, pero con esta guia dejara de ser una molestia, espero que les sea de mucha utilidad y recuerden que esta guia esta enfocado en proyectos Ioni con Angular.
+
 Funcionando desde el `30/01/2020`
+
+- [Configuración previa](./#configuración-previa)
+- [Login con Google](./#login-con-google)
+- [Login con Facebook](./#login-con-facebook)
+
 
 ## Configuración previa
 Para desarrollar el login con google y facebook, debemos primero conectar nuestro proyecto ionic a firebase, para esto debemos:
- 1. Crear un proyecto en firebase
- 2. Instalar angularfire2 en nuestro proyecto Ionic
+ 1. Crear un proyecto en [firebase](https://console.firebase.google.com/)
+ 2. Instalar [angularfire2](https://github.com/angular/angularfire) en nuestro proyecto Ionic
  3. Configurar nuestro proyecto Ionic
 
 ### 1. Crear un proyecto en firebase
@@ -100,9 +106,9 @@ export class AppModule {}
 
 ## Login con Google
 Para implementar el login de google en nuestro proyecto ionic debemos:
-1. Habiliar autenticación de google en firebase
+1. Habiliar autenticación de google en [firebase](https://console.firebase.google.com/)
 2. Implementar la autenticación en Ionic
-3. Implementar el plugin GooglePlus
+3. Implementar el plugin [GooglePlus](https://ionicframework.com/docs/native/google-plus)
 
 ### 1. Habiliar autenticación de google en firebase
 Para habilitar la autenticación con google en firebase, solo debemos entrar a la consola de firebase, ingresar en la parte de `Authentication` y luego en `Método de inicio de sesión`.
@@ -190,6 +196,7 @@ NO PONER MAYUSCULAS EN EL NOMBRE DEL PAQUETE
 ![](https://i.imgur.com/ekP5qxX.png)
 
 Si estas utilizando capacitor, asegurate de editar también el nombre del paquete o dominio en el archivo `capacitor.config.json`
+
 ![](https://i.imgur.com/7YTzKrC.png)
 
 Ya que conocemos el nombre del paquete de nuestra aplicación volvemos a firebase e ingresamos el nombre en `nombre del paquete de android` en este caso sería `com.pragma.logingaf`, en `Apodo de la aplicacion` es recomendable poner el nombre de nuestra app para este caso sería LoginGaF y en el `Certificado de firma de depuración SHA-1` aunque firebase lo pida como opcional, para el login en ionic es muy importante, asi que ejecutamos el siguiente comando dependiendo del S.O. de nuestra maquina.
@@ -249,7 +256,7 @@ import { GooglePlus } from '@ionic-native/google-plus/ngx';
 export class AppModule {}
 ```
 
-Luego abrimos el archivo `/src/app/home/home.page.ts` e inyectamos los plugins antes mecionados
+Luego abrimos el archivo `/src/app/home/home.page.ts` e inyectamos los plugins antes mecionados y lo utilizamos de la siguiente manera, tenga en cuenta que el método `loginGoogle()` lo dividimos en otros dos métodos `loginGoogleAndroid()` y `loginGoogleWeb`.
 ```javascript
 import { Component } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
@@ -327,32 +334,99 @@ En el codigo anterior tenemos que reemplazar `<Tu client_id>` por nuestro `clien
 
 Si el codigo anterior fuera nuestro JSON del archivo `google-services.json`, nuestro `client_id` seria `"945473312650-fgpee13gk4vpbrqcnenbm4s5g78jtqk3.apps.googleusercontent.com"`
 
-Y finalmente para terminar con la implementación de nuestro login de google y construir el poryecto de android debemos copiar nuestro archivo `google-services.json` en la carpeta `/android` y en la carpeta `/android/app`, y listo temenos nuestro login de google funcionando en ambientes android y web.
+Y finalmente para terminar con la implementación de nuestro login de google y construir el poryecto de android debemos copiar nuestro archivo `google-services.json` en la carpeta `/android` y en la carpeta `/android/app`, y listo tenemos nuestro login de google funcionando en ambientes android y web.
 
+## Login con Facebook
+Para implementar el login de facebook en nuestro proyecto ionic debemos:
+1. Crear la aplicación en [facebook para desarrolladores](https://developers.facebook.com/)
+2. Configurar firebase con nuestra aplicación de facebook
+3. Implementar la autenticación en Ionic
 
+### 1. Crear la aplicación en facebook para desarrolladores
+Para crear una aplicación en facebook, debemos primero iniciar sesión para que se nos habilite la pestaña de `Mis apps` le damos click allí y luego en `Crear una aplicación` como podemos ver en la siguiente imagen.
 
+![](https://i.imgur.com/IhP8n6O.png)
 
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
+Luego proporcionamos el nombre de la aplicación y un correo electrónico que facebook automáticamente proporciona con el que hemos iniciado sesión, y le damos click en `Crear identificador de la app`.
+
+![](https://i.imgur.com/J8wHo8V.png)
+
+Se nos abrirá un panel de servicios que ofrece facebook para nuestra aplicación, escogemos `Inicio de sesión con Facebook` dandole click en `Configurar`.
+
+![](https://i.imgur.com/tBbFPAp.png)
+
+Luego facebook nos pedirá en que plataforma queremos usar el servicio, seleccionamos `web`, luego configuraremos el servicio para `android`.
+
+![](https://i.imgur.com/COl0OFJ.png)
+
+Ahora nos pediran la URL de la pagina que consumira el servicio de sesión con facebook, como en este caso solo será una configuración de prueba, proporcionare mi `localhost` con el puerto en el que corro mi proyecto ionic, de la siguiente manera.
+
+![](https://i.imgur.com/bM8sEvy.png)
+
+Damos click en `save` y luego omitimos los siguientes pasos, simplemente damos click en `Configuración` y luego en `Básica`, para configurar la política de privacidad ya que sin ella no podemos activar nuestra aplicación de facebook.
+
+![](https://i.imgur.com/UN2z4Fj.png)
+
+Para configurar la política de privacidad de nuestra aplicación, simplemente ingresamos en `URL de la Política de privacidad` exactamente la url en la que estamos, dicha url sería `https://developers.facebook.com/apps/${tuIdApp}/settings/basic/`, lo cual quedaria algo asi.
+
+![](https://i.imgur.com/QFFBTKb.png)
+
+Ahora cambiamos el estado de nuestra aplicación dandole click al boton que se muestra en la parte superior del panel.
+![](https://i.imgur.com/JolZQCD.png)
+
+Luego nos mostrarán un modal para que elijamos la categoría de la aplicación, seleccionamos el que más se relacione con nuestra aplicación y le damos click en `Cambiar modo`.
+
+![](https://i.imgur.com/CeOLgtq.png)
+
+### 2. Configurar firebase con nuestra aplicación de facebook
+Para configurar nuestra aplicación de facebook en firebase, necesitamos el `Identificador de la app` y la `Clave secreta de la app`, que podemos encontrar en facebook volviendo a `Configuración > Básica`, donde configuramos anteriormente la política de seguridad, para obtener la clave secreta debemos darle click en mostrar.
+
+![](https://i.imgur.com/2CqdSOL.png)
+
+Luego ingresamos la clave de la cuenta con la que iniciamos sesión en facebook.
+
+![](https://i.imgur.com/xb9nMLJ.png)
+
+Damos click en `Enviar` y podremos ver la clave secreta de nuestra aplicación de facebook.
+
+Ahora volvemos a la consola de firebase e ingresamos en `Authentication > Método de inicio de sesión` como hicimos anteriormente para habilitar la autenticación de google, solo que esta vez será para habilitar la autenticación con facebook, para esto damos click en `facebook`.
+
+![](https://i.imgur.com/94guU3V.png)
+
+Damos click en habilitar e ingresamos el identificador de la app en `App ID` y la clave secreta en `App Secret`, y antes de darle `Guardar` copiamos la url que nos proporcionan debajo del `App Secret`.
+
+![](https://i.imgur.com/eZQ2tkx.png)
+
+Ahora si le damos en `Guardar` y volvemos a facebook, allí damos click en `Inicio de sesión con Facebook` y luego en `Configuración`.
+
+![](https://i.imgur.com/wbnQ2Py.png)
+
+Y en `URI de redireccionamiento de OAuth válidos` pegamos la url que copiamos de firebase y le damos en `Guardar cambios`.
+
+![](https://i.imgur.com/4l4okYb.png)
+
+### 3. Implementar la autenticación en Ionic
+Para implementar la autenticación de facebook en nuestro proyecto ionic simplemente debemos editar el método `loginFacebook()` de la siguiente manera.
+
+```javascript
+async loginFacebook() {
+    const res = await this.afAuth.auth.signInWithPopup(new firebase.auth.FacebookAuthProvider());
+    const user = res.user;
+    console.log(user);
+    this.picture = user.photoURL;
+    this.name = user.displayName;
+    this.email = user.email;
+}
+```
+
+Ahora, corremos nuestro proyecto ionic e intentemos iniciar sesión con facebook, deberiamos obtener el siguiente error.
+
+![](https://i.imgur.com/adD8PHO.png)
+
+Pero esto no quiere decir que implementamos mal el login con facebook, solo que facebook rechaza las peticiones de autenticación de un sitio web que corre en http y no en https, y nosotros estamos corriendo nuestra aplicación en http, pero esto quiere decir que nuestra aplicación ya hace peticiones de autenticación a facebook en ambientes web.
+
+*Autor:* *Fabian Serna*
+*Correos*: *fabian.serna@pragma.com.co* o *fabianserna2013@gmail.com*
 
 
 

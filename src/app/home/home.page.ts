@@ -50,8 +50,13 @@ export class HomePage {
     this.email = user.email;
   }
 
-  loginFacebook() {
-    console.log('Login con Facebook');
+  async loginFacebook() {
+    const res = await this.afAuth.auth.signInWithPopup(new firebase.auth.FacebookAuthProvider());
+    const user = res.user;
+    console.log(user);
+    this.picture = user.photoURL;
+    this.name = user.displayName;
+    this.email = user.email;
   }
 
 }
