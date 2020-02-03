@@ -4,4 +4,7 @@
     <string name="title_activity_main">LoginGaF</string>
     <string name="package_name">com.pragma.logingaf</string>
     <string name="custom_url_scheme">com.pragma.logingaf</string>
+    <string name="fb_app_name">LoginGaF</string>
+    <string name="fb_app_id">600043833895236</string>
+    <string name="fb_login_protocol_scheme">fb600043833895236</string>
 </resources>

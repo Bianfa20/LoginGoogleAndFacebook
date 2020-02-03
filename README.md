@@ -4,9 +4,9 @@ Implementar un login con google o con facebook en ionic puede ser un dolor de ca
 
 Funcionando desde el `30/01/2020`
 
-- [Configuración previa](./#configuración-previa)
-- [Login con Google](./#login-con-google)
-- [Login con Facebook](./#login-con-facebook)
+- [Configuración previa](https://github.com/Bianfa20/LoginGoogleAndFacebook#configuración-previa)
+- [Login con Google](https://github.com/Bianfa20/LoginGoogleAndFacebook#login-con-google)
+- [Login con Facebook](https://github.com/Bianfa20/LoginGoogleAndFacebook#login-con-facebook)
 
 
 ## Configuración previa
@@ -208,7 +208,7 @@ $ keytool -list -v -alias androiddebugkey -keystore ~/.android/debug.keystore
 
 Windows:
 ```sh
-> keytool -list -v -alias androiddebugkey -keystore C:\Users\${suUsuario}\.android\debug.keystore
+> keytool -list -v -alias androiddebugkey -keystore C:\Users\SUUSUARIO\.android\debug.keystore
 ```
 
 *nota:* La variable `keytool` para windows la podemos usar instalando la versión reciente de JDK.
@@ -334,13 +334,14 @@ En el codigo anterior tenemos que reemplazar `<Tu client_id>` por nuestro `clien
 
 Si el codigo anterior fuera nuestro JSON del archivo `google-services.json`, nuestro `client_id` seria `"945473312650-fgpee13gk4vpbrqcnenbm4s5g78jtqk3.apps.googleusercontent.com"`
 
-Y finalmente para terminar con la implementación de nuestro login de google y construir el poryecto de android debemos copiar nuestro archivo `google-services.json` en la carpeta `/android` y en la carpeta `/android/app`, y listo tenemos nuestro login de google funcionando en ambientes android y web.
+Y finalmente para terminar con la implementación de nuestro login de google debemos construir el proyecto de android y copiar nuestro archivo `google-services.json` en la carpeta `/android` y en la carpeta `/android/app`, y listo tenemos nuestro login de google funcionando en ambientes android y web.
 
 ## Login con Facebook
 Para implementar el login de facebook en nuestro proyecto ionic debemos:
 1. Crear la aplicación en [facebook para desarrolladores](https://developers.facebook.com/)
 2. Configurar firebase con nuestra aplicación de facebook
 3. Implementar la autenticación en Ionic
+4. Implementar el plugin [facebook](https://ionicframework.com/docs/native/facebook)
 
 ### 1. Crear la aplicación en facebook para desarrolladores
 Para crear una aplicación en facebook, debemos primero iniciar sesión para que se nos habilite la pestaña de `Mis apps` le damos click allí y luego en `Crear una aplicación` como podemos ver en la siguiente imagen.
@@ -423,9 +424,191 @@ Ahora, corremos nuestro proyecto ionic e intentemos iniciar sesión con facebook
 
 ![](https://i.imgur.com/adD8PHO.png)
 
-Pero esto no quiere decir que implementamos mal el login con facebook, solo que facebook rechaza las peticiones de autenticación de un sitio web que corre en http y no en https, y nosotros estamos corriendo nuestra aplicación en http, pero esto quiere decir que nuestra aplicación ya hace peticiones de autenticación a facebook en ambientes web.
+Pero esto no quiere decir que implementamos mal el login con facebook, solo que facebook rechaza las peticiones de autenticación de un sitio web que corre en http y no en https, y nosotros estamos corriendo nuestra aplicación en http, lo que quiere decir que nuestra aplicación ya hace peticiones de autenticación a facebook en ambientes web.
 
-*Autor:* *Fabian Serna*
+### 4. Implementar el plugin facebook
+Hasta este punto de la guia ya tenemos un login con facebook funcionando solo en ambientes web, ahora vamos a implementar el plugin `facebook` en nuestro proyecto ionic para que nuestro login funcione en ambientes android también, para esto debemos comenzar con la instalación de dicho plugin.
+
+Para la instalación del plugin necesitamos el `Identificador de la app` y el `Nombre para mostrar` que se encuentra en la `Configuración > Básica` de nuestra aplicación de facebook.
+
+![](https://i.imgur.com/ghm9z0S.png)
+
+Luego debemos ejecutar el siguiente comando reemplazando las variables con los datos que acabamos de consultar de nuestra aplicación.
+
+```sh
+\ProyectoIonic>  ionic cordova plugin add cordova-plugin-facebook4 --variable APP_ID="TuIdentificadorDeLaApp" --variable APP_NAME="TuNombreParaMostrar"
+
+\ProyectoIonic> npm install @ionic-native/facebook
+```
+
+Abrimos el archivo `/src/app/app.module.ts` e importamos Facebook
+
+```javascript
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+...
+
+// Plugins
+import { GooglePlus } from '@ionic-native/google-plus/ngx';
+import { Facebook } from '@ionic-native/facebook/ngx';
+
+@NgModule({
+  declarations: [AppComponent],
+  imports: [
+    BrowserModule,
+    IonicModule.forRoot(),
+    AppRoutingModule,
+    AngularFireModule.initializeApp(firebaseConfig), //Modulo 1 a importa
+    AngularFireAuthModule // Modulo 2 a importar
+  ],
+  providers: [
+      ...,
+      GooglePlus,
+      Facebook
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}
+```
+
+Luego abrimos el archivo `/src/app/home/home.page.ts` e inyectamos el plugin `facebook` para utilizarlo de la siguiente manera, tenga en cuenta que el método `loginFacebook()` lo dividimos en otros dos métodos `loginFacebookAndroid()` y `loginFacebookWeb()`.
+
+```javascript
+import { Component } from '@angular/core';
+import { AngularFireAuth } from '@angular/fire/auth';
+import * as firebase from 'firebase/app';
+import { Platform } from '@ionic/angular';
+import { GooglePlus } from '@ionic-native/google-plus/ngx';
+import { Facebook, FacebookLoginResponse } from '@ionic-native/facebook/ngx';
+
+@Component({
+  selector: 'app-home',
+  templateUrl: 'home.page.html',
+  styleUrls: ['home.page.scss'],
+})
+export class HomePage {
+  ...
+  constructor(
+    private afAuth: AngularFireAuth,
+    private platform: Platform,
+    private googlePlus: GooglePlus,
+    private fb: Facebook
+  ) {}
+
+  loginFacebook() {
+    if (this.platform.is('capacitor')) {
+      this.loginFacebookAndroid();
+    } else {
+      this.loginFacebookWeb();
+    }
+  }
+
+  async loginFacebookAndroid() {
+    const res: FacebookLoginResponse = await this.fb.login(['public_profile', 'email']);
+    const facebookCredential = firebase.auth.FacebookAuthProvider.credential(res.authResponse.accessToken);
+    const resConfirmed = await this.afAuth.auth.signInWithCredential(facebookCredential);
+    const user = resConfirmed.user;
+    this.picture = user.photoURL;
+    this.name = user.displayName;
+    this.email = user.email;
+  }
+
+  async loginFacebookWeb() {
+    const res = await this.afAuth.auth.signInWithPopup(new firebase.auth.FacebookAuthProvider());
+    const user = res.user;
+    console.log(user);
+    this.picture = user.photoURL;
+    this.name = user.displayName;
+    this.email = user.email;
+  }
+  ...
+}
+```
+
+### 5. Configurar proyecto android
+Luego de implementar el plugin 'facebook' en nuestro proyecto, debemos agregar la plataforma de android en nuestra aplicación de facebook, desde facebook para desarrolladores, entrando de nuevo a la `Configuración > Básica`, como lo hemos hecho anteriormente, y bajamos del todo en la pagina y damos en `Agregar plataforma`.
+
+![](https://i.imgur.com/sSjmOVm.png)
+
+Luego nos pedirán seleccionar una plataforma seleccionamos `Android`
+
+![](https://i.imgur.com/QD9PHCp.png)
+
+Facebook nos pedirá el nombre del paquete, que ya todos sabemos cual es en este caso, `com.pragma.logingaf` y nos pedirá un hash de clave la cual obtenemos ejecutando el siguiente comando dependiendo del S.O. de su maquina.
+
+Mac/Linux:
+```sh
+$ keytool -exportcert -alias androiddebugkey -keystore ~/.android/debug.keystore | openssl sha1 -binary | openssl base64
+```
+
+Windows:
+```sh
+> keytool -exportcert -alias androiddebugkey -keystore "C:\Users\SUUSUARIO\.android\debug.keystore" | openssl sha1 -binary | openssl base64
+```
+*nota:* La variable openssl para windows la podemos encontrar en https://code.google.com/archive/p/openssl-for-windows/downloads
+
+El comando anterior nos pedirá una contraseña, ingresamos android y obtendremos el hash que necesitamos proporcionarle a facebook.
+
+Luego de conocer el nombre del paquete y el hash de clave volvemos a facebook e ingresamos los datos en sus campos correspondientes, activamos la opcion `Inicio de sesión único` y damos en `Guardar cambios`, como se puede ver en la siguiente imagen.
+
+![](https://i.imgur.com/aDUAcDd.png)
+
+Al darle `Guardar cambios` facebook nos notificará que no pudo encontrar la aplicación en Google Play con el nombre del paquete, pero eso significa que todo esta bien, ya que no hemos subido nuestra aplicación en dicha tienda, simplemente le damos en `Usar el nombre de este paquete`.
+
+![](https://i.imgur.com/hbSo4EO.png)
+
+Por último necesitamos configurar lo siguiente en nuestro proyecto de android.
+
+Abrimos el archivo `strings.xml` que normalmente se encuentra en `/app/res/values/` del proyecto de android y agregamos las siguientes lines.
+
+```android
+<string name="fb_app_name">NombreDeTuAppEnFacebook</string>
+<string name="fb_app_id">IdentificadorDeLaApp</string>
+<string name="fb_login_protocol_scheme">fb'IdentificadorDeLaApp'</string>
+```
+En este caso sería.
+
+```android
+<resources>
+    <string name="app_name">LoginGaF</string>
+    <string name="title_activity_main">LoginGaF</string>
+    <string name="package_name">com.pragma.logingaf</string>
+    <string name="custom_url_scheme">com.pragma.logingaf</string>
+    <string name="fb_app_name">LoginGaF</string>
+    <string name="fb_app_id">600043833895236</string>
+    <string name="fb_login_protocol_scheme">fb600043833895236</string>
+</resources>
+```
+
+Tenga en cuenta que la última linea es el mismo identificador de la app pero con un `fb` antes.
+Ahora editamos el archivo `AndroidManifest.xml` que normalmente se encuentra en `/app/manifests/`, agregando a la etiqueta manifest la siguiente propiedad.
+
+```android
+<manifest
+    xmlns:tools="http://schemas.android.com/tools"
+...>
+```
+
+y debajo del `activity` en el mismo archiv `manifest.xml` agregamos lo siguiente.
+
+```android
+<meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/fb_app_id"/>
+<activity tools:replace="android:label" android:name="com.facebook.FacebookActivity" android:configChanges= "keyboard|keyboardHidden|screenLayout|screenSize|orientation" android:label="@string/app_name" />
+<activity android:name="com.facebook.CustomTabActivity" android:exported="true">
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="@string/fb_login_protocol_scheme" />
+    </intent-filter>
+</activity>
+```
+
+Y finalmente tenemos un login con google y facebook funcionando en ambientes android y web utilizando Ionic 4.
+
+Ojalá esta guía les pueda ser muy útil.
+
+*Autor:* *Fabian Serna*.
 *Correos*: *fabian.serna@pragma.com.co* o *fabianserna2013@gmail.com*
 
 
