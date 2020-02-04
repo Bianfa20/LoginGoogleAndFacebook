@@ -604,7 +604,7 @@ y debajo del `activity` en el mismo archivo `manifest.xml` agregamos lo siguient
 </activity>
 ```
 
-Y por último debemos resolver el error de hash que se genera al implementar facebook con ionic en android studio, para esto simplemente corremos nuestro proyecto android en un dispositivo móvil físico, no en un emulador porque estos seguiran utilizando el hash que ya hemos registrado en facebook.
+Y por último debemos resolver el error de hash que se genera al ejecutar nuestra aplicación ionic en un dispositivo android físico, ya que facebook lo tomará como una aplicación que ya ha sido publicado en la tienda de `GooglePlay` y exigirá el hash con la que fue publicada, cuando en realidad sigue siendo una aplicación en modo desarrollo, para esto simplemente corremos nuestro proyecto android en un dispositivo móvil físico, no en un emulador porque estos seguiran utilizando el hash que ya hemos registrado en facebook.
 
 Con la aplicación corriendo en nuestro celular intentamos iniciar sesión con facebook y volvemos al ide de android, entramos en la pestaña `LogCat`, ingresamos `hash` en el buscador y seleccionamos `No Filters`, deberiamos obtener el siguiente error.
 
