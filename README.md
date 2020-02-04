@@ -557,7 +557,7 @@ Al darle `Guardar cambios` facebook nos notificará que no pudo encontrar la apl
 
 ![](https://i.imgur.com/hbSo4EO.png)
 
-Por último necesitamos configurar lo siguiente en nuestro proyecto de android.
+Ahora necesitamos configurar lo siguiente en nuestro proyecto de android.
 
 Abrimos el archivo `strings.xml` que normalmente se encuentra en `/app/res/values/` del proyecto de android y agregamos las siguientes lines.
 
@@ -589,7 +589,7 @@ Ahora editamos el archivo `AndroidManifest.xml` que normalmente se encuentra en 
 ...>
 ```
 
-y debajo del `activity` en el mismo archiv `manifest.xml` agregamos lo siguiente.
+y debajo del `activity` en el mismo archivo `manifest.xml` agregamos lo siguiente.
 
 ```android
 <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/fb_app_id"/>
@@ -604,7 +604,15 @@ y debajo del `activity` en el mismo archiv `manifest.xml` agregamos lo siguiente
 </activity>
 ```
 
-Y finalmente tenemos un login con google y facebook funcionando en ambientes android y web utilizando Ionic 4.
+Y por último debemos añadir el hash de las apk que genera android studio, para esto simplemente abrimos nuestro proyecto de android y sin correr el proyecto entramos en la pestaña `LogCat` e ingresamos `hash` en el buscador, debemos obtener el siguiente error.
+
+![](https://i.imgur.com/eQKEu39.png)
+
+Y el `key hash` de la imagen anterior, marcado en rojo, es el hash que debemos añadir en nuestra aplicación de facebook, volviendo a `Configuración > Básica`, como hicimos añadiendo el primer hash.
+
+![](https://i.imgur.com/POdZgx3.png)
+
+Damos en `Guardar cambios` luego en `Usar el nombre de este paquete` y finalmente tenemos un login con google y facebook funcionando en ambientes android y web utilizando Ionic 4.
 
 Ojalá esta guía les pueda ser muy útil.
 
